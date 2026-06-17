@@ -48,6 +48,22 @@ spec:
         image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.6.0
         ports:
         - containerPort: 5050
+        env:
+        - name: PORT
+          value: "5050"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
+        - name: SHIPPING_SERVICE_ADDR
+          value: "shippingservice:50051"
+        - name: PAYMENT_SERVICE_ADDR
+          value: "paymentservice:50051"
+        - name: EMAIL_SERVICE_ADDR
+          value: "emailservice:5000"
+        - name: CURRENCY_SERVICE_ADDR
+          value: "currencyservice:7000"
+        - name: CART_SERVICE_ADDR
+          value: "cartservice:7070"
+
 ---
 apiVersion: v1
 kind: Service
@@ -134,6 +150,153 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: server
+        image: gcr.io/google-samples/microservices-demo/frontend:v0.6.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
+        - name: CART_SERVICE_ADDR
+          value: "cartservice:7070"
+        - name: CHECKOUT_SERVICE_ADDR
+          value: "checkoutservice:5050"
+        - name: CURRENCY_SERVICE_ADDR
+          value: "currencyservice:7000"
+        - name: SHIPPING_SERVICE_ADDR
+          value: "shippingservice:50051"
+        - name: RECOMMENDATION_SERVICE_ADDR
+          value: "recommendationservice:8080"
+        - name: EMAIL_SERVICE_ADDR
+          value: "emailservice:5000"
+        - name: PAYMENT_SERVICE_ADDR
+          value: "paymentservice:50051"
+        - name: AD_SERVICE_ADDR
+          value: "adservice:9555"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentservice
+spec:
+  selector:
+    matchLabels:
+      app: paymentservice
+  template:
+    metadata:
+      labels:
+        app: paymentservice
+    spec:
+      containers:
+      - name: server
+        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.6.0
+        ports:
+        - containerPort: 50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paymentservice
+spec:
+  selector:
+    app: paymentservice
+  ports:
+  - port: 50051
+    targetPort: 50051
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productcatalogservice
+spec:
+  selector:
+    matchLabels:
+      app: productcatalogservice
+  template:
+    metadata:
+      labels:
+        app: productcatalogservice
+    spec:
+      containers:
+      - name: server
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.6.0
+        ports:
+        - containerPort: 3550
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: productcatalogservice
+spec:
+  selector:
+    app: productcatalogservice
+  ports:
+  - port: 3550
+    targetPort: 3550
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartservice
+spec:
+  selector:
+    matchLabels:
+      app: cartservice
+  template:
+    metadata:
+      labels:
+        app: cartservice
+    spec:
+      containers:
+      - name: server
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.6.0
+        ports:
+        - containerPort: 7070
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cartservice
+spec:
+  selector:
+    app: cartservice
+  ports:
+  - port: 7070
+    targetPort: 7070
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: shippingservice
 spec:
   selector:
@@ -192,149 +355,6 @@ spec:
   ports:
   - port: 9555
     targetPort: 9555
-  type: ClusterIP
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cartservice
-spec:
-  selector:
-    matchLabels:
-      app: cartservice
-  template:
-    metadata:
-      labels:
-        app: cartservice
-    spec:
-      containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.6.0
-        ports:
-        - containerPort: 7070
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: cartservice
-spec:
-  selector:
-    app: cartservice
-  ports:
-  - port: 7070
-    targetPort: 7070
-  type: ClusterIP
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: productcatalogservice
-spec:
-  selector:
-    matchLabels:
-      app: productcatalogservice
-  template:
-    metadata:
-      labels:
-        app: productcatalogservice
-    spec:
-      containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.6.0
-        ports:
-        - containerPort: 3550
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: productcatalogservice
-spec:
-  selector:
-    app: productcatalogservice
-  ports:
-  - port: 3550
-    targetPort: 3550
-  type: ClusterIP
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: frontend
-spec:
-  selector:
-    matchLabels:
-      app: frontend
-  template:
-    metadata:
-      labels:
-        app: frontend
-    spec:
-      containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/frontend:v0.6.0
-        ports:
-        - containerPort: 8080
-        env:
-        - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalogservice:3550"
-        - name: CART_SERVICE_ADDR
-          value: "cartservice:7070"
-        - name: CHECKOUT_SERVICE_ADDR
-          value: "checkoutservice:5050"
-        - name: CURRENCY_SERVICE_ADDR
-          value: "currencyservice:7000"
-        - name: SHIPPING_SERVICE_ADDR
-          value: "shippingservice:50051"
-        - name: RECOMMENDATION_SERVICE_ADDR
-          value: "recommendationservice:8080"
-        - name: AD_SERVICE_ADDR
-          value: "adservice:9555"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-spec:
-  selector:
-    app: frontend
-  ports:
-  - port: 80
-    targetPort: 8080
-  type: ClusterIP
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: paymentservice
-spec:
-  selector:
-    matchLabels:
-      app: paymentservice
-  template:
-    metadata:
-      labels:
-        app: paymentservice
-    spec:
-      containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.6.0
-        ports:
-        - containerPort: 50051
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: paymentservice
-spec:
-  selector:
-    app: paymentservice
-  ports:
-  - port: 50051
-    targetPort: 50051
   type: ClusterIP
 
 ---
